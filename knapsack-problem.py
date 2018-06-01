@@ -1,4 +1,5 @@
 import random
+import copy
 
 n = 0
 w = []
@@ -42,7 +43,7 @@ def readProblemFrom(name):
                 currentSolution['w'] += lineW
             else:
                 currentSolution['items'].append(0)
-        bestSolution = currentSolution.copy()
+        bestSolution = copy.deepcopy(currentSolution)
 
 def isValidStateWith(w):
     return currentSolution['w'] + w <= maxWeight
@@ -51,46 +52,56 @@ def addItem(item, solution):
     solution['items'][item] = 1
     solution['w'] += w[item]
     solution['v'] += v[item]
-    return solution.copy()
+    return copy.deepcopy(solution)
 
 def removeItem(item, solution):
     solution['items'][item] = 0
     solution['w'] -= w[item]
     solution['v'] -= v[item]
-    return solution.copy()
+    return copy.deepcopy(solution)
 
 def isBetterSolution(solution):
     return (solution['v'] > bestSolution['v']) or (solution['v'] == bestSolution['v'] and solution['w'] < bestSolution['w'])
 
-def newStates():
-    global currentSolution
+def allNewStates():
     possibleStates = []
     for i in range(n):
-        solution_i = currentSolution.copy()
-        if solution_i['items'][i] == 0:
-            if isValidStateWith(w[i]):
-                solution_i = addItem(i, solution_i)
-                possibleStates.append(solution_i.copy())
-        else:
-            solution_i = removeItem(i, solution_i)
-            possibleStates.append(solution_i.copy())
-    
+        new = newStateFor(i)
+        if new != None:
+            possibleStates.append(copy.deepcopy(new))
     return possibleStates
 
-def lazyRandomWalk():
+def newStateFor(i):
+    global currentSolution
+    solution_i = copy.deepcopy(currentSolution)
+    if solution_i['items'][i] == 0:
+        if isValidStateWith(w[i]):
+            solution_i = addItem(i, solution_i)
+            return solution_i
+    else:
+        solution_i = removeItem(i, solution_i)
+        return solution_i
+    
+    return None
+
+def randomWalk(p):
     global bestSolution, currentSolution
     count = 0
-    while(count<10):
+    while(count<50000):
         count += 1
         unif = random.random()
-        if unif < 0.5:
-            possibleStates = newStates()
-            index = random.randint(0, len(possibleStates)-1)
-            newState = possibleStates[index]
-            currentSolution = newState.copy()
+        if unif < p:
+            newState = None
+            while (newState == None):
+                index = random.randint(0, n-1)
+                newState = newStateFor(index)
+            currentSolution = copy.deepcopy(newState)
             if isBetterSolution(currentSolution):
-                bestSolution = currentSolution.copy()
+                print('best: ', bestSolution['v'], '    i:', count)
+                bestSolution = copy.deepcopy(currentSolution)
 
 
-readProblemFrom('teste.csv')
-lazyRandomWalk()
+readProblemFrom('teste2.csv')
+print('opti: ', optimum)
+randomWalk(1)
+print('opti: ', optimum)
