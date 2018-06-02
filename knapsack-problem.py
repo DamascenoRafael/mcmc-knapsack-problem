@@ -1,5 +1,9 @@
 import random
 import copy
+import numpy.random as nprand
+import time
+import math
+import mathplotlib
 
 n = 0
 w = []
@@ -8,26 +12,28 @@ v = []
 maxWeight = 0
 optimum = 0
 
-solution = {
-    'items': [],
-    'v': 0,
-    'w': 0
-}
+currentSolution = {}
 
-currentSolution = {
-    'items': [],
-    'v': 0,
-    'w': 0
-}
-
-bestSolution = {
-    'items': [],
-    'v': 0,
-    'w': 0
-}
+bestSolution = {}
 
 def readProblemFrom(name):
-    global n, maxWeight, optimum, bestSolution
+    global n, maxWeight, optimum, bestSolution,currentSolution,w,v
+    w = []
+    v = []
+    currentSolution = {
+    'items': [],
+    'v': 0,
+    'w': 0,
+    'itt':0
+    }
+
+    bestSolution = {
+        'items': [],
+        'v': 0,
+        'w': 0,
+        'itt':0,
+    }
+
     with open(name) as f:
         n = int(f.readline().split()[1])
         maxWeight = int(f.readline().split()[1])
@@ -64,11 +70,13 @@ def isBetterSolution(solution):
     return (solution['v'] > bestSolution['v']) or (solution['v'] == bestSolution['v'] and solution['w'] < bestSolution['w'])
 
 def allNewStates():
+    start = time.time()
     possibleStates = []
     for i in range(n):
         new = newStateFor(i)
         if new != None:
             possibleStates.append(copy.deepcopy(new))
+    print("states",time.time()-start)
     return possibleStates
 
 def newStateFor(i):
@@ -87,7 +95,7 @@ def newStateFor(i):
 def randomWalk(p):
     global bestSolution, currentSolution
     count = 0
-    while(count<50000):
+    while(count<500):
         count += 1
         unif = random.random()
         if unif < p:
@@ -97,11 +105,39 @@ def randomWalk(p):
                 newState = newStateFor(index)
             currentSolution = copy.deepcopy(newState)
             if isBetterSolution(currentSolution):
-                print('best: ', bestSolution['v'], '    i:', count)
                 bestSolution = copy.deepcopy(currentSolution)
+                print('best: ', bestSolution['v'], '    i:', count)
+                bestSolution['itt']=count
+
+    print("best",bestSolution,"\ncurr",currentSolution,"\nOpt",optimum)
 
 
-readProblemFrom('teste2.csv')
+
+def accept(newState):
+    global currentSolution
+    unif = random.random()
+    if(unif < (newState['v'])/(currentSolution['v'])):
+        return True
+    return False      
+    
+def metropolisHasting():
+    global currentSolution, bestSolution
+    count = 0
+    while(count<10000):
+        count+=1
+        newState = None
+        while (newState == None):
+            index = random.randint(0, n-1)
+            newState = newStateFor(index)
+        if( accept(newState)):
+            currentSolution = copy.deepcopy(newState)
+            if(isBetterSolution(currentSolution)):
+                bestSolution = copy.deepcopy(currentSolution)
+                print('best: ', bestSolution['v'], '    i:', count)
+                bestSolution['itt']=count
+    print("best",bestSolution['v'],"\ncurr",currentSolution['v'],"\nOpt",optimum)
+
+readProblemFrom('TC/500_11.csv')
 print('opti: ', optimum)
-randomWalk(1)
-print('opti: ', optimum)
+#randomWalk(0.5)
+metropolisHasting()
