@@ -1,6 +1,8 @@
 import random
 import copy
 import numpy as np
+import math
+import gc
 from datetime import datetime
 
 
@@ -49,12 +51,12 @@ class Simulation():
     bestSolution = None
     currentSolution = None
     optimum = 0
-    states = {}
 
     def __init__(self,file):
         random.seed(datetime.now())
-        print("Reading File...")
-        
+        self.n = 0
+        self.w = []
+        self.v = []
         with open(file) as f:
             self.n = int(f.readline().split()[1])
             self.maxWeight = int(f.readline().split()[1])
@@ -73,7 +75,6 @@ class Simulation():
                 else:
                     self.currentSolution.items.append(0)
         self.bestSolution = self.currentSolution.copy()
-        print("File Read")
 
     def isValidStateWith(self,w):
         return self.currentSolution.w + w <= self.maxWeight
@@ -124,7 +125,7 @@ class Simulation():
         p = []
         p_ii = 1
         currentV = self.currentSolution.v
-        for state in states:
+        for state in states:  
             p_ij = min(1,state.v/currentV)/(len(states))
             p.append(p_ij)
             p_ii -= p_ij
@@ -133,31 +134,58 @@ class Simulation():
     
     def metropolisHasting(self):
         count = 0
+        self.states = {}
         while(count<5000):
             count+=1
-            possibleStates = None
-            prob = None
-            if (self.currentSolution in self.states):
-                possibleStates,prob = self.states[self.currentSolution]
-            else:
-                possibleStates = self.newStates()
-                prob = self.calculeteP(possibleStates)
-                possibleStates.append(self.currentSolution.copy())
-                self.states[self.currentSolution] = [possibleStates[:],prob[:]]                           
+            possibleStates = self.newStates()
+            prob = self.calculeteP(possibleStates)
+            possibleStates.append(self.currentSolution.copy())
+            self.states[self.currentSolution] = [possibleStates[:],prob[:]]                           
             newState = State()
             newState = np.random.choice(possibleStates,p=prob).copy()
             self.currentSolution = newState.copy()
             if self.isBetterSolution(self.currentSolution):
                 self.bestSolution = self.currentSolution.copy()
-                print("itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+                #print("itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+                if(self.bestSolution.v == self.optimum):
+                    break
+        return count
                     
 
 
 if __name__ == '__main__':
-    #problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
-    #for problem in problems
-    #    s = Simulation('TC/'+problem)
-    #    s.metropolisHasting()
-    #    print(s.optimum,s.maxWeight)
-    s = Simulation("TC/500_11.csv")
-    s.metropolisHasting()
+    problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
+    
+
+    for problem in problems:
+        values = []
+        values_itt = []
+        max_min = [0,math.inf]
+        itt_max_min = [0,math.inf]
+        for i in range(50):
+            print("Problem ",problem,"Simutaion ",i)
+            s = Simulation('TC/'+problem)
+            itt = s.metropolisHasting()
+            values.append(s.bestSolution.v)
+            values_itt.append(itt)
+            if(s.bestSolution.v>max_min[0]):
+                max_min[0] = s.bestSolution.v
+            if(s.bestSolution.v<max_min[1]):
+                max_min[1] = s.bestSolution.v
+            if(itt>itt_max_min[0]):
+                itt_max_min[0] = itt
+            if(itt<itt_max_min[1]):
+                itt_max_min[1] = itt
+        print("=========================")
+        print('Problem Optimal :: ',s.optimum)
+        print("Optimal :: ",itt_max_min[0],"Worse :: ",itt_max_min[1])
+        print('Mean Optimal :: ',np.median(values))
+        print('Variance Optimal :: ',np.var(values))
+        print("=========================")
+        print("Max itt :: ",itt_max_min[0],"Min itt :: ",itt_max_min[1])
+        print('Mean itt :: ',np.median(values_itt))
+        print('Variance  itt :: ',np.var(values_itt))
+        print("=========================")
+
+
+   
