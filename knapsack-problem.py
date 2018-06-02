@@ -1,9 +1,8 @@
 import random
 import copy
-import numpy.random as nprand
+import numpy as np
 import time
 import math
-import mathplotlib
 
 n = 0
 w = []
@@ -116,14 +115,16 @@ def randomWalk(p):
 def accept(newState):
     global currentSolution
     unif = random.random()
-    if(unif < (newState['v'])/(currentSolution['v'])):
+    alfa = (newState['v']*math.log(currentSolution['w'])) / (currentSolution['v']*math.log(newState['w']))
+    #alfa = (newState['v'])/(currentSolution['v'])
+    if(unif < alfa ):
         return True
     return False      
     
 def metropolisHasting():
     global currentSolution, bestSolution
     count = 0
-    while(count<10000):
+    while(count<5000):
         count+=1
         newState = None
         while (newState == None):
@@ -133,11 +134,28 @@ def metropolisHasting():
             currentSolution = copy.deepcopy(newState)
             if(isBetterSolution(currentSolution)):
                 bestSolution = copy.deepcopy(currentSolution)
-                print('best: ', bestSolution['v'], '    i:', count)
+                #print('best: ', bestSolution['v'], '    i:', count)
                 bestSolution['itt']=count
-    print("best",bestSolution['v'],"\ncurr",currentSolution['v'],"\nOpt",optimum)
+                if(bestSolution['v']==optimum):
+                    break
+    #print("best",bestSolution['v'],"\ncurr",currentSolution['v'],"\nOpt",optimum)
 
-readProblemFrom('TC/500_11.csv')
-print('opti: ', optimum)
-#randomWalk(0.5)
-metropolisHasting()
+problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
+
+for problem in problems:
+    values = []
+    values_itt = []
+    for i in range(50):
+        print(problem,i)
+        readProblemFrom("TC/"+problem)
+        metropolisHasting()
+        values.append(bestSolution['v'])
+        values_itt.append(bestSolution['itt'])
+
+    print("\n",problem)
+    print('Problem Optimal :: ',optimum)
+    print('Mean Optimal :: ',np.median(values))
+    print('Variance Optimal :: ',np.var(values))
+    print('Mean itt :: ',np.median(values_itt))
+    print('Variance  itt :: ',np.var(values_itt))
+

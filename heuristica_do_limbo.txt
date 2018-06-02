@@ -1,0 +1,42 @@
+==================================
+ 500_11.csv
+Problem Optimal ::  3468
+Mean Optimal ::  3283.0
+Variance Optimal ::  11735.770000000002
+Mean itt ::  1248.5
+Variance  itt ::  1994754.2563999998
+=================================
+ 500_12.csv
+Problem Optimal ::  2231
+Mean Optimal ::  2117.0
+Variance Optimal ::  1726.3824000000002
+Mean itt ::  37.0
+Variance  itt ::  1677435.0724000002
+================================
+ 500_13.csv
+Problem Optimal ::  3198
+Mean Optimal ::  3198.0
+Variance Optimal ::  0.0
+Mean itt ::  324.5
+Variance  itt ::  89340.4816
+=================================
+ 500_14.csv
+Problem Optimal ::  12746
+Mean Optimal ::  9936.5
+Variance Optimal ::  55481.7936
+Mean itt ::  1913.0
+Variance  itt ::  1891136.8416
+================================
+ 500_15.csv
+Problem Optimal ::  2508
+Mean Optimal ::  2484.0
+Variance Optimal ::  4.953599999999999
+Mean itt ::  2595.5
+Variance  itt ::  1573898.8816
+===============================
+ 500_16.csv
+Problem Optimal ::  13145
+Mean Optimal ::  10990.5
+Variance Optimal ::  35064.4436
+Mean itt ::  2543.0
+Variance  itt ::  1679450.48
