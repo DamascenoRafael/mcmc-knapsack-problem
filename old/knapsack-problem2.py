@@ -46,6 +46,9 @@ class State():
     
     def __eq__(self,other):
         return self.items == other.items
+    
+    def __gt__(self,other):
+        return self.v > other.v
 
 class Simulation():
 
@@ -166,6 +169,23 @@ class Simulation():
                     break
         return count
 
+    def betterStatesThanCurrent(self, states):
+        return [state for state in states if state.v > self.currentSolution.v]
+
+    def hillClimbing(self):
+        # bestSolution is always currentSolution
+        count = 0
+        while(1):
+            count+=1
+            newState = max(self.newStates())
+            if self.isBetterSolution(newState):
+                self.bestSolution = newState.copy()
+                #print("FOUND BETTER: itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+            else:
+                print("LOCAL MAX: itt =>",count-1,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+                break
+        return count-1
+
     def calculate(self,solution):
         sum = 0
         for i in range(len(solution.items)):
@@ -180,34 +200,35 @@ if __name__ == '__main__':
     # s.metropolisHasting()
     # print('best found',s.bestSolution.v,'\nbest calculated',s.calculate(s.bestSolution),'\nbest from file',s.optimum)
     for problem in problems:
-        values = []
-        values_itt = []
-        max_min = [0,math.inf]
-        itt_max_min = [0,math.inf]
+        # values = []
+        # values_itt = []
+        # max_min = [0,math.inf]
+        # itt_max_min = [0,math.inf]
         for i in range(50):
             print("Problem ",problem,"Simutaion ",i)
             s = Simulation('TC/'+problem)
-            itt = s.metropolisHasting()
-            values.append(s.bestSolution.v)
-            values_itt.append(itt)
-            if(s.bestSolution.v>max_min[0]):
-                max_min[0] = s.bestSolution.v
-            if(s.bestSolution.v<max_min[1]):
-                max_min[1] = s.bestSolution.v
-            if(itt>itt_max_min[0]):
-                itt_max_min[0] = itt
-            if(itt<itt_max_min[1]):
-                itt_max_min[1] = itt
-        print("=========================")
-        print('Problem Optimal :: ',s.optimum)
-        print("Optimal :: ",itt_max_min[0],"Worse :: ",itt_max_min[1])
-        print('Mean Optimal :: ',np.median(values))
-        print('Variance Optimal :: ',np.var(values))
-        print("=========================")
-        print("Max itt :: ",itt_max_min[0],"Min itt :: ",itt_max_min[1])
-        print('Mean itt :: ',np.median(values_itt))
-        print('Variance  itt :: ',np.var(values_itt))
-        print("=========================")
+            s.hillClimbing()
+        #     itt = s.metropolisHasting()
+        #     values.append(s.bestSolution.v)
+        #     values_itt.append(itt)
+        #     if(s.bestSolution.v>max_min[0]):
+        #         max_min[0] = s.bestSolution.v
+        #     if(s.bestSolution.v<max_min[1]):
+        #         max_min[1] = s.bestSolution.v
+        #     if(itt>itt_max_min[0]):
+        #         itt_max_min[0] = itt
+        #     if(itt<itt_max_min[1]):
+        #         itt_max_min[1] = itt
+        # print("=========================")
+        # print('Problem Optimal :: ',s.optimum)
+        # print("Optimal :: ",itt_max_min[0],"Worse :: ",itt_max_min[1])
+        # print('Mean Optimal :: ',np.median(values))
+        # print('Variance Optimal :: ',np.var(values))
+        # print("=========================")
+        # print("Max itt :: ",itt_max_min[0],"Min itt :: ",itt_max_min[1])
+        # print('Mean itt :: ',np.median(values_itt))
+        # print('Variance  itt :: ',np.var(values_itt))
+        # print("=========================")
 
 
    
