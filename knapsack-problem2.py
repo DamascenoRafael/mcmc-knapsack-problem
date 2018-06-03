@@ -8,9 +8,14 @@ from datetime import datetime
 
 class State():
 
-    items = []
+    items = None
     v = 0
     w = 0
+
+    def __init__(self):
+        self.items = []
+        self.v = 0
+        self.w = 0
 
     def setIn(self,index,v,w):
         if(self.items[index]!=1):
@@ -29,8 +34,8 @@ class State():
     def copy(self):
         obj_copy = State()
         obj_copy.items = self.items[:]
-        obj_copy.v = self.v
-        obj_copy.w = self.w
+        obj_copy.v += self.v
+        obj_copy.w += self.w
         return obj_copy
 
     def __repr__(self):
@@ -51,12 +56,15 @@ class Simulation():
     bestSolution = None
     currentSolution = None
     optimum = 0
+    states = None
 
     def __init__(self,file):
         random.seed(datetime.now())
         self.n = 0
         self.w = []
         self.v = []
+        self.bestSolution = None
+        self.currentSolution = None
         with open(file) as f:
             self.n = int(f.readline().split()[1])
             self.maxWeight = int(f.readline().split()[1])
@@ -76,20 +84,25 @@ class Simulation():
                     self.currentSolution.items.append(0)
         self.bestSolution = self.currentSolution.copy()
 
-    def isValidStateWith(self,w):
-        return self.currentSolution.w + w <= self.maxWeight
+    def isValidStateWith(self,w,state = State()):
+        if(len(state.items) == 0):
+            state = self.currentSolution
+        return state.w + w <= self.maxWeight
 
     def isBetterSolution(self,solution):
         return (solution.v > self.bestSolution.v) or (solution.v == self.bestSolution.v and solution.w < self.bestSolution.w)
 
-    def newStates(self):
+    def newStates(self,state = State()):
+        if(len(state.items) == 0 ):
+            state = self.currentSolution.copy()
+
         possibleStates = []
+        solution_i = State()
         for i in range(self.n):
-            solution_i =  State()
-            solution_i = self.currentSolution.copy()
+            solution_i = state.copy()
             
             if solution_i.items[i] == 0:
-                if self.isValidStateWith(self.w[i]):
+                if self.isValidStateWith(self.w[i],state):
                     solution_i.setIn(i,self.v[i],self.w[i])
                     possibleStates.append(solution_i.copy())
             else:
@@ -127,9 +140,12 @@ class Simulation():
         p_ii = 1
         currentV = self.currentSolution.v
         for state in states:  
+            
             p_ij = min(1,state.v/currentV)/(len(states))
             p.append(p_ij)
             p_ii -= p_ij
+            if(p_ij<0):
+                print(state,len(state.items),self.n)
         p.append(p_ii)
         return p[:]    
     
@@ -149,43 +165,49 @@ class Simulation():
                 if(self.bestSolution.v == self.optimum):
                     break
         return count
-                    
+
+    def calculate(self,solution):
+        sum = 0
+        for i in range(len(solution.items)):
+            if(solution.items[i]):
+                sum+= self.v[i]
+        return sum        
 
 
 if __name__ == '__main__':
     problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
-    s = Simulation('teste2.csv')
-    itt = s.metropolisHasting()
-    s.bestSolution.v
-    # for problem in problems:
-    #     values = []
-    #     values_itt = []
-    #     max_min = [0,math.inf]
-    #     itt_max_min = [0,math.inf]
-    #     for i in range(50):
-    #         print("Problem ",problem,"Simutaion ",i)
-    #         s = Simulation('TC/'+problem)
-    #         itt = s.metropolisHasting()
-    #         values.append(s.bestSolution.v)
-    #         values_itt.append(itt)
-    #         if(s.bestSolution.v>max_min[0]):
-    #             max_min[0] = s.bestSolution.v
-    #         if(s.bestSolution.v<max_min[1]):
-    #             max_min[1] = s.bestSolution.v
-    #         if(itt>itt_max_min[0]):
-    #             itt_max_min[0] = itt
-    #         if(itt<itt_max_min[1]):
-    #             itt_max_min[1] = itt
-    #     print("=========================")
-    #     print('Problem Optimal :: ',s.optimum)
-    #     print("Optimal :: ",itt_max_min[0],"Worse :: ",itt_max_min[1])
-    #     print('Mean Optimal :: ',np.median(values))
-    #     print('Variance Optimal :: ',np.var(values))
-    #     print("=========================")
-    #     print("Max itt :: ",itt_max_min[0],"Min itt :: ",itt_max_min[1])
-    #     print('Mean itt :: ',np.median(values_itt))
-    #     print('Variance  itt :: ',np.var(values_itt))
-    #     print("=========================")
+    # s = Simulation('TC/500_11.csv')
+    # s.metropolisHasting()
+    # print('best found',s.bestSolution.v,'\nbest calculated',s.calculate(s.bestSolution),'\nbest from file',s.optimum)
+    for problem in problems:
+        values = []
+        values_itt = []
+        max_min = [0,math.inf]
+        itt_max_min = [0,math.inf]
+        for i in range(50):
+            print("Problem ",problem,"Simutaion ",i)
+            s = Simulation('TC/'+problem)
+            itt = s.metropolisHasting()
+            values.append(s.bestSolution.v)
+            values_itt.append(itt)
+            if(s.bestSolution.v>max_min[0]):
+                max_min[0] = s.bestSolution.v
+            if(s.bestSolution.v<max_min[1]):
+                max_min[1] = s.bestSolution.v
+            if(itt>itt_max_min[0]):
+                itt_max_min[0] = itt
+            if(itt<itt_max_min[1]):
+                itt_max_min[1] = itt
+        print("=========================")
+        print('Problem Optimal :: ',s.optimum)
+        print("Optimal :: ",itt_max_min[0],"Worse :: ",itt_max_min[1])
+        print('Mean Optimal :: ',np.median(values))
+        print('Variance Optimal :: ',np.var(values))
+        print("=========================")
+        print("Max itt :: ",itt_max_min[0],"Min itt :: ",itt_max_min[1])
+        print('Mean itt :: ',np.median(values_itt))
+        print('Variance  itt :: ',np.var(values_itt))
+        print("=========================")
 
 
    
