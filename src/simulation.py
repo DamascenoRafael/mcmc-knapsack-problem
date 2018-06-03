@@ -50,34 +50,30 @@ class Simulation():
         return (solution.v > self.bestSolution.v) or (solution.v == self.bestSolution.v and solution.w < self.bestSolution.w)
 
     def allNewStates(self,state = State()):
-        if(len(state.items) == 0 ):
+        if len(state.items) == 0:
             state = self.currentSolution.copy()
 
         possibleStates = []
-        solution_i = State()
         for i in range(self.n):
-            solution_i = state.copy()
-            
-            if solution_i.items[i] == 0:
-                if self.isValidStateWith(self.w[i],state):
-                    solution_i.setIn(i,self.v[i],self.w[i])
-                    possibleStates.append(solution_i.copy())
-            else:
-                solution_i.setOut(i,self.v[i],self.w[i])
-                possibleStates.append(solution_i.copy())
-
+            new = State()
+            new = self.newStateFor(i, state)
+            if len(new.items) != 0:
+                possibleStates.append(new.copy())
         return possibleStates[:]
     
-    def newStateFor(self, i):
-        solution_i = State()
-        solution_i = self.currentSolution.copy()
-        if solution_i.items[i] == 0:
-            if self.isValidStateWith(self.w[i]):
-                solution_i.setIn(i, self.v[i], self.w[i])
-                return solution_i
+    def newStateFor(self, i, state = State()):
+        if len(state.items) == 0:
+            state = self.currentSolution.copy()
+        
+        state_i = State()
+        state_i = state.copy()
+        if state_i.items[i] == 0:
+            if self.isValidStateWith(self.w[i], state):
+                state_i.setIn(i, self.v[i], self.w[i])
+                return state_i
         else:
-            solution_i.setOut(i, self.v[i], self.w[i])
-            return solution_i
+            state_i.setOut(i, self.v[i], self.w[i])
+            return state_i
     
         return State()
 
