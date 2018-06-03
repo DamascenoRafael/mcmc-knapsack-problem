@@ -2,15 +2,15 @@ import math
 from simulation import *
 
 if __name__ == '__main__':
-    #problems = ['500_11.csv']
-    problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
+    problems = ['500_11.csv']
+    #problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
     for problem in problems:
         values = []
         values_itt = []
         max_min = [0,math.inf]
         itt_max_min = [0,math.inf]
 
-        for i in range(50):
+        for i in range(1):
             print("Problem ",problem,"Simutaion ",i)
             s = Simulation('../data/'+problem)
             
@@ -18,8 +18,10 @@ if __name__ == '__main__':
             #itt = s.randomWalk(0.5)
             #itt = s.metropolisHasting()
             #itt = s.hillClimbing()
-            itt, temperature = s.simulatedAnnealing(10**4, 10**(-8), s.linearCoolingStrategy, 0.5)
+            #itt, temperature = s.simulatedAnnealing(10**4, 10**(-8), s.linearCoolingStrategy, 0.5)
             #itt, temperature = s.simulatedAnnealing(10**30, 10**(-8), s.expCoolingStrategy, 0.99)
+            itt, temperature = s.simulatedAnnealing(10**5, 10**(-8), s.dynamicCoolingStrategy, 0.5)
+
             print('Last Temp:',temperature)
 
             values.append(s.bestSolution.v)

@@ -2,7 +2,7 @@ import random
 import numpy as np
 from datetime import datetime
 from state import *
-from math import exp
+from math import exp,log
 
 class Simulation():
 
@@ -177,8 +177,10 @@ class Simulation():
                 self.bestSolution = self.currentSolution.copy()
                 #print("itt =>",t,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 if(self.bestSolution.v == self.optimum):
-                    break
-            
+                    #break
+                    pass
+                    
+            print(temperature)
             temperature = coolingStrategy(initialT, beta, t, delta)
         return t, temperature
 
@@ -189,7 +191,7 @@ class Simulation():
         return initialT*(beta**t)
 
     def dynamicCoolingStrategy(self, initialT, beta, t, delta):
-        pass
+        return initialT-beta*t - (log(abs(delta))/delta)*t
 
     def verifyValues(self,solution):
         sum = 0
