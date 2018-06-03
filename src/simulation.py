@@ -2,6 +2,7 @@ import random
 import numpy as np
 from datetime import datetime
 from state import *
+from math import exp
 
 class Simulation():
 
@@ -48,7 +49,7 @@ class Simulation():
     def isBetterSolution(self,solution):
         return (solution.v > self.bestSolution.v) or (solution.v == self.bestSolution.v and solution.w < self.bestSolution.w)
 
-    def newStates(self,state = State()):
+    def allNewStates(self,state = State()):
         if(len(state.items) == 0 ):
             state = self.currentSolution.copy()
 
@@ -66,6 +67,19 @@ class Simulation():
                 possibleStates.append(solution_i.copy())
 
         return possibleStates[:]
+    
+    def newStateFor(self, i):
+        solution_i = State()
+        solution_i = self.currentSolution.copy()
+        if solution_i.items[i] == 0:
+            if self.isValidStateWith(self.w[i]):
+                solution_i.setIn(i, self.v[i], self.w[i])
+                return solution_i
+        else:
+            solution_i.setOut(i, self.v[i], self.w[i])
+            return solution_i
+    
+        return State()
 
     def randomWalk(self,p):
         print("Max",self.maxWeight)
@@ -74,7 +88,7 @@ class Simulation():
             count += 1
             unif = random.random()
             if unif < p:
-                possibleStates = self.newStates()
+                possibleStates = self.allNewStates()
                 index = random.randint(0, len(possibleStates)-1)
                 newState = State()
                 newState = possibleStates[index].copy()
@@ -110,7 +124,7 @@ class Simulation():
         count = 0
         while(count<5000):
             count+=1
-            possibleStates = self.newStates()
+            possibleStates = self.allNewStates()
             prob = self.calculeteP(possibleStates)
             possibleStates.append(self.currentSolution.copy())
             newState = State()
@@ -123,15 +137,12 @@ class Simulation():
                     break
         return count
 
-    def betterStatesThanCurrent(self, states):
-        return [state for state in states if state.v > self.currentSolution.v]
-
     def hillClimbing(self):
         # bestSolution is always currentSolution
         count = 0
         while(1):
             count+=1
-            newState = max(self.newStates())
+            newState = max(self.allNewStates())
             if self.isBetterSolution(newState):
                 self.bestSolution = newState.copy()
                 #print("FOUND BETTER: itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
@@ -139,8 +150,52 @@ class Simulation():
                 print("LOCAL MAX: itt =>",count-1,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 break
         return count-1
+    
+    def boltzman(self, deltaV, t):
+        return exp(deltaV/t)
 
-    def calculate(self,solution):
+    def simulatedAnnealing(self, initialT, epsilon, coolingStrategy, beta):
+        t = 0
+        temperature = initialT
+        while(temperature > epsilon):
+            t+=1
+            currentChanged = False
+            # possibleStates = self.allNewStates()
+            # newState = State()
+            # newState = np.random.choice(possibleStates).copy()
+            newState = State()
+            while (len(newState.items) == 0):
+                index = random.randint(0, self.n-1)
+                newState = self.newStateFor(index).copy()
+            delta = newState.v-self.currentSolution.v
+            if delta > 0:
+                # boltzman = 1
+                self.currentSolution = newState.copy()
+                currentChanged = True
+            else:
+                if random.random() < self.boltzman(delta, temperature):
+                    self.currentSolution = newState.copy()
+                    currentChanged = True
+
+            if currentChanged and self.isBetterSolution(self.currentSolution):
+                self.bestSolution = self.currentSolution.copy()
+                #print("itt =>",t,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+                if(self.bestSolution.v == self.optimum):
+                    break
+            
+            temperature = coolingStrategy(initialT, beta, t, delta)
+        return t, temperature
+
+    def linearCoolingStrategy(self, initialT, beta, t, delta):
+        return initialT-beta*t
+
+    def expCoolingStrategy(self, initialT, beta, t, delta):
+        return initialT*(beta**t)
+
+    def dynamicCoolingStrategy(self, initialT, beta, t, delta):
+        pass
+
+    def verifyValues(self,solution):
         sum = 0
         for i in range(len(solution.items)):
             if(solution.items[i]):
