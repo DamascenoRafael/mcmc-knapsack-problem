@@ -177,8 +177,7 @@ class Simulation():
                 self.bestSolution = self.currentSolution.copy()
                 #print("itt =>",t,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 if(self.bestSolution.v == self.optimum):
-                    #break
-                    pass
+                    break
                     
             print(temperature)
             temperature = coolingStrategy(initialT, beta, t, delta)
