@@ -20,9 +20,10 @@ def knapSack(W, wt, val, n):
 
 
 if __name__ == '__main__':
-    problems = ['500_11.csv']
+    # problems = ['500_11.csv']
     # problems = ['500_11.csv','500_12.csv','500_13.csv','500_14.csv','500_15.csv','500_16.csv']
     # problems = ['teste2.csv']
+    problems = ['teste3.csv']
 
     values = []
 
