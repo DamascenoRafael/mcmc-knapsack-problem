@@ -14,6 +14,7 @@ class Simulation():
     currentSolution = None
     optimum = 0
     prob = {}
+    executions = 10**4
 
     def __init__(self,file):
         random.seed(datetime.now())
@@ -82,7 +83,7 @@ class Simulation():
     def randomWalk(self,p):
         print("Max",self.maxWeight)
         count = 0
-        while(count<10000):
+        while(count<self.executions):
             count += 1
             unif = random.random()
             if unif < p:
@@ -93,8 +94,14 @@ class Simulation():
                 self.currentSolution = newState.copy()
                 if self.isBetterSolution(self.currentSolution):
                     self.bestSolution = self.currentSolution.copy()
-                    print("Best  V =>",self.bestSolution.v,self.bestSolution.w)
-        return count
+                    break
+            ret.append(self.bestSolution.v)
+
+        if(count<self.executions):
+            for i in range(count,self.executions):
+                ret.append(self.bestSolution.v)
+        return ret
+
 
     def accept(self,newState, pij, pji):
         unif = random.random()
@@ -120,7 +127,8 @@ class Simulation():
     
     def metropolisHasting(self):
         count = 0
-        while(count<5000):
+        ret =[]
+        while(count<self.executions):
             count += 1
             currentChanged = False
             newState = State()
@@ -154,24 +162,34 @@ class Simulation():
                     currentChanged = True
             if currentChanged and self.isBetterSolution(self.currentSolution):
                 self.bestSolution = self.currentSolution.copy()
-                print("itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 if(self.bestSolution.v == self.optimum):
                     break
-        return count
+            ret.append(self.bestSolution.v)
+
+        if(count<self.executions):
+            for i in range(count,self.executions):
+                ret.append(self.bestSolution.v)
+        return ret
 
     def hillClimbing(self):
         # bestSolution is always currentSolution
         count = 0
+        ret = []
         while(1):
             count+=1
             newState = max(self.allNewStates())
             if self.isBetterSolution(newState):
                 self.bestSolution = newState.copy()
                 #print("FOUND BETTER: itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+                ret.append(self.bestSolution.v)
             else:
                 print("LOCAL MAX: itt =>",count-1,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 break
-        return count-1
+
+        if(count<self.executions):
+            for i in range(count,self.executions):
+                ret.append(self.bestSolution.v)
+        return ret
     
     def boltzman(self, deltaV, t, pij, pji):
         return exp(deltaV/t) * pji / pij
@@ -179,6 +197,7 @@ class Simulation():
     def simulatedAnnealing(self, initialT, epsilon, coolingStrategy, beta):
         t = 0
         temperature = initialT
+        ret = []
         while(temperature > epsilon):
             t+=1
             currentChanged = False
@@ -216,9 +235,14 @@ class Simulation():
                 if(self.bestSolution.v == self.optimum):
                     break
                     
-            print(temperature)
+            ret.append(self.bestSolution.v)
             temperature = coolingStrategy(initialT, beta, t, delta)
-        return t, temperature
+
+        if(t<self.executions):
+            for i in range(t,self.executions):
+                ret.append(self.bestSolution.v)
+        return ret
+        
 
     def linearCoolingStrategy(self, initialT, beta, t, delta):
         return initialT-beta*t
