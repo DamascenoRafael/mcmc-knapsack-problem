@@ -16,11 +16,11 @@ if __name__ == '__main__':
             
             #itt = s.randomWalk(1)
             #itt = s.randomWalk(0.5)
-            #itt = s.metropolisHasting()
+            itt = s.metropolisHasting()
             #itt = s.hillClimbing()
             #itt, temperature = s.simulatedAnnealing(10**4, 10**(-8), s.linearCoolingStrategy, 0.5)
             #itt, temperature = s.simulatedAnnealing(10**30, 10**(-8), s.expCoolingStrategy, 0.99)
-            itt, temperature = s.simulatedAnnealing(10**5, 10**(-8), s.dynamicCoolingStrategy, 0.5)
+            #itt, temperature = s.simulatedAnnealing(10**5, 10**(-8), s.dynamicCoolingStrategy, 0.5)
 
             print('Last Temp:',temperature)
 

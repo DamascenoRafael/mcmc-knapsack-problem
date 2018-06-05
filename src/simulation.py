@@ -13,7 +13,7 @@ class Simulation():
     bestSolution = None
     currentSolution = None
     optimum = 0
-    states = None
+    prob = {}
 
     def __init__(self,file):
         random.seed(datetime.now())
@@ -22,6 +22,8 @@ class Simulation():
         self.v = []
         self.bestSolution = None
         self.currentSolution = None
+        prob = None
+        prob = {}
         with open(file) as f:
             self.n = int(f.readline().split()[1])
             self.maxWeight = int(f.readline().split()[1])
@@ -137,14 +139,22 @@ class Simulation():
                 self.currentSolution = newState.copy()
                 currentChanged = True
             else:
-                pij = 1 / len(self.allNewStates())
-                pji = 1 / len(self.allNewStates(newState))
+                
+                pij = self.prob.setdefault(self.currentSolution, None)
+                if pij == None:
+                    pij = 1 / len(self.allNewStates())
+                    self.prob[self.currentSolution] = pij
+                
+                pji = self.prob.setdefault(newState, None)
+                if pji == None:
+                    pji = 1 / len(self.allNewStates(newState))
+                    self.prob[newState] = pji
                 if self.accept(newState, pij, pji):
                     self.currentSolution = newState.copy()
                     currentChanged = True
             if currentChanged and self.isBetterSolution(self.currentSolution):
                 self.bestSolution = self.currentSolution.copy()
-                #print("itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
+                print("itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 if(self.bestSolution.v == self.optimum):
                     break
         return count
@@ -185,8 +195,17 @@ class Simulation():
                 self.currentSolution = newState.copy()
                 currentChanged = True
             else:
-                pij = 1 / len(self.allNewStates())
-                pji = 1 / len(self.allNewStates(newState))
+                pij = self.prob.setdefault(self.currentSolution, None)
+                if pij == None:
+                    pij = 1 / len(self.allNewStates())
+                    self.prob[self.currentSolution] = pij
+                
+                pji = self.prob.setdefault(newState, None)
+                if pji == None:
+                    pji = 1 / len(self.allNewStates(newState))
+                    self.prob[newState] = pji
+    
+                    
                 if random.random() < self.boltzman(delta, temperature, pij, pji):
                     self.currentSolution = newState.copy()
                     currentChanged = True
