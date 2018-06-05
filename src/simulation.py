@@ -94,11 +94,11 @@ class Simulation():
                     print("Best  V =>",self.bestSolution.v,self.bestSolution.w)
         return count
 
-    def accept(self,newState):
+    def accept(self,newState, pij, pji):
         unif = random.random()
-        alfa = (newState['v']*math.log(currentSolution['w'])) / (currentSolution['v']*math.log(newState['w']))
-        #alfa = (newState['v'])/(currentSolution['v'])
-        if(unif < alfa ):
+        # alfa = (newState.v*math.log(self.currentSolution.w)) / (currentSolution.v*math.log(newState.w))
+        alfa = (newState.v * pji) / (self.currentSolution.v * pij)
+        if unif < alfa:
             return True
         return False
 
@@ -119,14 +119,30 @@ class Simulation():
     def metropolisHasting(self):
         count = 0
         while(count<5000):
-            count+=1
-            possibleStates = self.allNewStates()
-            prob = self.calculeteP(possibleStates)
-            possibleStates.append(self.currentSolution.copy())
+            count += 1
+            currentChanged = False
             newState = State()
-            newState = np.random.choice(possibleStates,p=prob).copy()
-            self.currentSolution = newState.copy()
-            if self.isBetterSolution(self.currentSolution):
+            while (len(newState.items) == 0):
+                index = random.randint(0, self.n-1)
+                newState = self.newStateFor(index).copy()
+            # possibleStates = self.allNewStates()
+            # prob = self.calculeteP(possibleStates)
+            #possibleStates.append(self.currentSolution.copy())
+            #newState = State()
+            #newState = np.random.choice(possibleStates,p=prob).copy()
+
+            delta = newState.v - self.currentSolution.v
+            if delta > 0:
+                # accept = 1
+                self.currentSolution = newState.copy()
+                currentChanged = True
+            else:
+                pij = 1 / len(self.allNewStates())
+                pji = 1 / len(self.allNewStates(newState))
+                if self.accept(newState, pij, pji):
+                    self.currentSolution = newState.copy()
+                    currentChanged = True
+            if currentChanged and self.isBetterSolution(self.currentSolution):
                 self.bestSolution = self.currentSolution.copy()
                 #print("itt =>",count,"- Best  V =>",self.bestSolution.v,"W =>",self.bestSolution.w)
                 if(self.bestSolution.v == self.optimum):
@@ -147,8 +163,8 @@ class Simulation():
                 break
         return count-1
     
-    def boltzman(self, deltaV, t):
-        return exp(deltaV/t)
+    def boltzman(self, deltaV, t, pij, pji):
+        return exp(deltaV/t) * pji / pij
 
     def simulatedAnnealing(self, initialT, epsilon, coolingStrategy, beta):
         t = 0
@@ -169,7 +185,9 @@ class Simulation():
                 self.currentSolution = newState.copy()
                 currentChanged = True
             else:
-                if random.random() < self.boltzman(delta, temperature):
+                pij = 1 / len(self.allNewStates())
+                pji = 1 / len(self.allNewStates(newState))
+                if random.random() < self.boltzman(delta, temperature, pij, pji):
                     self.currentSolution = newState.copy()
                     currentChanged = True
 
