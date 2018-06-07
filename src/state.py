@@ -9,15 +9,15 @@ class State():
         self.v = 0
         self.w = 0
 
-    def setIn(self,index,v,w):
-        if(self.items[index]!=1):
+    def setIn(self, index, v, w):
+        if self.items[index] != 1:
             self.items[index] = 1
             self.w += w
             self.v += v
         return self
 
-    def setOut(self,index,v,w):
-        if(self.items[index]!=0):
+    def setOut(self, index, v, w):
+        if self.items[index] != 0:
             self.items[index] = 0
             self.w -= w
             self.v -= v
@@ -31,13 +31,13 @@ class State():
         return obj_copy
 
     def __repr__(self):
-        return str(self.items)+","+str(self.v)+","+str(self.w)
+        return str(self.items) + ',' + str(self.v) + ',' + str(self.w)
 
     def __hash__(self):
         return hash(repr(self))
     
-    def __eq__(self,other):
+    def __eq__(self, other):
         return self.items == other.items
     
-    def __gt__(self,other):
+    def __gt__(self, other):
         return self.v > other.v
