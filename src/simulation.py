@@ -6,25 +6,26 @@ from math import exp, log
 
 class Simulation():
 
-    n = 0
-    w = []
-    v = []
-    maxWeight = 0
-    bestSolution = None
-    currentSolution = None
-    optimum = 0
-    prob = {}
-    executions = 10 ** 4
+    n = 0                       # total of available items
+    w = []                      # list with item weights
+    v = []                      # list with item values
+    maxWeight = 0               # maximum weight supported by the knapsack
+    bestSolution = None         # State of the best solution found so far
+    currentSolution = None      # State of the current algorithm solution (except Hill Climbing)
+    optimum = 0                 # value of the optimal solution for the instance
+    transitionProb = {}         # dictionary with uniform transition probability coming out of the key state
+    executions = 1              # number of iterations for the algorithms (except Simulated Annealing)
 
-    def __init__(self, file):
+    def __init__(self, file, executions = 1):
         random.seed(datetime.now())
+        self.executions = executions
         self.n = 0
         self.w = []
         self.v = []
         self.bestSolution = None
         self.currentSolution = None
-        prob = None
-        prob = {}
+        transitionProb = None
+        transitionProb = {}
         with open(file) as f:
             self.n = int(f.readline().split()[1])
             self.maxWeight = int(f.readline().split()[1])
@@ -63,6 +64,16 @@ class Simulation():
             if len(new.items) != 0:
                 possibleStates.append(new.copy())
         return possibleStates[:]
+    
+    def transitionProbFrom(self, state = State()):
+        if len(state.items) == 0:
+            state = self.currentSolution.copy()
+        
+        pij = self.transitionProb.setdefault(state, None)
+        if pij == None:
+            pij = 1 / len(self.allNewStates(state.copy()))
+            self.transitionProb[self.currentSolution] = pij
+        return pij
     
     def newStateFor(self, i, state = State()):
         if len(state.items) == 0:
@@ -136,16 +147,8 @@ class Simulation():
                 self.currentSolution = newState.copy()
                 currentChanged = True
             else:
-                pij = self.prob.setdefault(self.currentSolution, None)
-                if pij == None:
-                    pij = 1 / len(self.allNewStates())
-                    self.prob[self.currentSolution] = pij
-                
-                pji = self.prob.setdefault(newState, None)
-                if pji == None:
-                    pji = 1 / len(self.allNewStates(newState))
-                    self.prob[newState] = pji
-
+                pij = self.transitionProbFrom()
+                pji = self.transitionProbFrom(newState)
                 if self.accept(newState, pij, pji):
                     self.currentSolution = newState.copy()
                     currentChanged = True
@@ -192,16 +195,8 @@ class Simulation():
                 self.currentSolution = newState.copy()
                 currentChanged = True
             else:
-                pij = self.prob.setdefault(self.currentSolution, None)
-                if pij == None:
-                    pij = 1 / len(self.allNewStates())
-                    self.prob[self.currentSolution] = pij
-                
-                pji = self.prob.setdefault(newState, None)
-                if pji == None:
-                    pji = 1 / len(self.allNewStates(newState))
-                    self.prob[newState] = pji
-                    
+                pij = self.transitionProbFrom()
+                pji = self.transitionProbFrom(newState)
                 if random.random() < self.boltzman(delta, temperature, pij, pji):
                     self.currentSolution = newState.copy()
                     currentChanged = True

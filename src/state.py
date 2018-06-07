@@ -1,8 +1,8 @@
 class State():
 
-    items = None
-    v = 0
-    w = 0
+    items = None    # list indicating the presence of items in the state
+    v = 0           # total value of state - sum of item values
+    w = 0           # total weight of state - sum of item weights
 
     def __init__(self):
         self.items = []
