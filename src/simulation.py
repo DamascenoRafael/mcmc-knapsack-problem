@@ -51,7 +51,10 @@ class Simulation():
         return state.w + w <= self.maxWeight
 
     def isBetterSolution(self, solution):
-        return (solution.v > self.bestSolution.v) or (solution.v == self.bestSolution.v and solution.w < self.bestSolution.w)
+        if (solution.v > self.bestSolution.v) or (solution.v == self.bestSolution.v and solution.w < self.bestSolution.w):
+            self.bestSolution = solution.copy()
+            return True
+        return False
 
     def allNewStates(self, state = State()):
         if len(state.items) == 0:
@@ -104,7 +107,6 @@ class Simulation():
                 newState = possibleStates[index].copy()
                 self.currentSolution = newState.copy()
                 if self.isBetterSolution(self.currentSolution):
-                    self.bestSolution = self.currentSolution.copy()
                     break
             ret.append(self.bestSolution.v)
 
@@ -154,7 +156,6 @@ class Simulation():
                     currentChanged = True
             
             if currentChanged and self.isBetterSolution(self.currentSolution):
-                self.bestSolution = self.currentSolution.copy()
                 if self.bestSolution.v == self.optimum:
                     break
             ret.append(self.bestSolution.v)
@@ -167,7 +168,6 @@ class Simulation():
             count += 1
             newState = max(self.allNewStates())
             if self.isBetterSolution(newState):
-                self.bestSolution = newState.copy()
                 # print('FOUND BETTER: itt =>', count, '- Best  V =>', self.bestSolution.v, 'W =>', self.bestSolution.w)
                 ret.append(self.bestSolution.v)
             else:
@@ -202,7 +202,6 @@ class Simulation():
                     currentChanged = True
 
             if currentChanged and self.isBetterSolution(self.currentSolution):
-                self.bestSolution = self.currentSolution.copy()
                 # print('itt =>', t, '- Best  V =>', self.bestSolution.v, 'W =>', self.bestSolution.w)
                 if self.bestSolution.v == self.optimum:
                     break
