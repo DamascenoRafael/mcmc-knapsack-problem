@@ -12,6 +12,7 @@ class Simulation():
     maxWeight = 0               # maximum weight supported by the knapsack
     bestSolution = None         # State of the best solution found so far
     currentSolution = None      # State of the current algorithm solution (except Hill Climbing)
+    initialSolution = None      # State of the initial solution generated on object constructor
     optimum = 0                 # value of the optimal solution for the instance
     transitionProb = {}         # dictionary with uniform transition probability coming out of the key state
     executions = 1              # number of iterations for the algorithms (except Simulated Annealing)
@@ -22,17 +23,17 @@ class Simulation():
         self.n = 0
         self.w = []
         self.v = []
-        self.bestSolution = None
+        self.initialSolution = None
         self.currentSolution = None
-        transitionProb = None
-        transitionProb = {}
+        self.transitionProb = None
+        self.transitionProb = {}
         with open(file) as f:
             self.n = int(f.readline().split()[1])
             self.maxWeight = int(f.readline().split()[1])
             self.optimum = int(f.readline().split()[1])
             f.readline()
+            self.initialSolution = State()
             self.currentSolution = State()
-            self.bestSolution = State() 
             for line in f:
                 _, lineV, lineW, _ = list(map(int, line.split(',')))
                 self.v.append(lineV)
@@ -43,7 +44,7 @@ class Simulation():
                     self.currentSolution.w += lineW
                 else:
                     self.currentSolution.items.append(0)
-        self.bestSolution = self.currentSolution.copy()
+        self.initialSolution = self.currentSolution.copy()
 
     def isValidStateWith(self, w, state = State()):
         if len(state.items) == 0:
@@ -95,6 +96,9 @@ class Simulation():
         return State()
 
     def randomWalk(self, p):
+        self.currentSolution = self.initialSolution.copy()
+        self.bestSolution = self.initialSolution.copy()
+
         name = 'Random Walk p = ' + str(p)
         t = 0   # steps
         ret = []
@@ -137,6 +141,10 @@ class Simulation():
         return p[:]    
     
     def metropolisHasting(self):
+        
+        self.currentSolution = self.initialSolution.copy()
+        self.bestSolution = self.initialSolution.copy()
+        
         name = 'Metropolis Hasting'
         t = 0   # steps
         ret = []
@@ -169,15 +177,21 @@ class Simulation():
 
     def hillClimbing(self):
         # bestSolution is always currentSolution
+        self.currentSolution = self.initialSolution.copy()
+        self.bestSolution = self.initialSolution.copy()
+        
         name = 'Hill Climbing'
         t = 0   # steps
-        ret = []
+        ret = [self.bestSolution.v]
+
         while 1:
             t += 1
-            newState = max(self.allNewStates())
+            newState = State()
+            newState = max(self.allNewStates(self.bestSolution))
             if self.isBetterSolution(newState):
                 ret.append(self.bestSolution.v)
             else:
+                ret.append(self.bestSolution.v)
                 break
         return name, ret
     
@@ -185,7 +199,16 @@ class Simulation():
         return exp(deltaV/t) * pji / pij
 
     def simulatedAnnealing(self, initialT, epsilon, coolingStrategy, beta):
-        name = 'Simulated Annealing T = ' + str(initialT) + ' b = ' + str(beta) + ' ' + coolingStrategy.__name__
+        self.currentSolution = self.initialSolution.copy()
+        self.bestSolution = self.initialSolution.copy()
+        
+        def format_e(n):
+            #format large number in scientific notation
+            a = '%E' % n
+            return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
+        
+
+        name = 'Simulated Annealing T = ' + str(format_e(initialT)) + ' b = ' + str(beta) + ' ' + coolingStrategy.__name__
         temperature = initialT
         t = 0   # steps
         ret = []
