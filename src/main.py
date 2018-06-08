@@ -37,9 +37,29 @@ def plotComparison(problems):
                 opt = float(splittedLine[0])
                 algorithmName = str(splittedLine[1])
                 splittedResults = list(map(lambda x: float(x), splittedLine[2:]))
-                plt.plot(range(len(splittedResults)), splittedResults, label=algorithmName)
+                plt.loglog(range(1,1+len(splittedResults)), splittedResults, label=algorithmName)
         
         plt.axhline(y=opt, linestyle='dashed', color='c')
+        plt.legend()
+        plt.xlabel('Steps')
+        plt.ylabel('Values in knapsack')
+        plt.savefig(outputFolder + problem + '.png')
+        plt.clf()
+
+def plotError(problems):
+    for problem in problems:
+        print('plotting', problem)
+        plt.figure(figsize=(16,9))
+        fileName = outputFolder + problem + '.out'
+        opt = 0
+        with open(fileName) as file:
+            for line in file:
+                splittedLine = line.split(',')
+                opt = float(splittedLine[0])
+                algorithmName = str(splittedLine[1])
+                splittedResults = list(map(lambda x: float(x)-opt, splittedLine[2:]))
+                plt.loglog  (range(1,1+len(splittedResults)), splittedResults, label=algorithmName)
+        
         plt.legend()
         plt.xlabel('Steps')
         plt.ylabel('Values in knapsack')

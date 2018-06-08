@@ -101,7 +101,7 @@ class Simulation():
 
         name = 'Random Walk p = ' + str(p)
         t = 0   # steps
-        ret = []
+        ret = [self.currentSolution.v]
         while t < self.executions:
             t += 1
             unif = random.random()
@@ -147,7 +147,7 @@ class Simulation():
         
         name = 'Metropolis Hasting'
         t = 0   # steps
-        ret = []
+        ret = [self.currentSolution.v]
         while t < self.executions:
             t += 1
             currentChanged = False
@@ -211,7 +211,7 @@ class Simulation():
         name = 'Simulated Annealing T = ' + str(format_e(initialT)) + ' b = ' + str(beta) + ' ' + coolingStrategy.__name__
         temperature = initialT
         t = 0   # steps
-        ret = []
+        ret = [self.currentSolution.v]
         while temperature > epsilon:
             t += 1
             currentChanged = False
