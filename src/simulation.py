@@ -95,10 +95,11 @@ class Simulation():
         return State()
 
     def randomWalk(self, p):
-        print('Max', self.maxWeight)
-        count = 0
-        while count < self.executions:
-            count += 1
+        name = 'Random Walk p = ' + str(p)
+        t = 0   # steps
+        ret = []
+        while t < self.executions:
+            t += 1
             unif = random.random()
             if unif < p:
                 possibleStates = self.allNewStates()
@@ -107,8 +108,11 @@ class Simulation():
                 newState = possibleStates[index].copy()
                 self.currentSolution = newState.copy()
                 if self.isBetterSolution(self.currentSolution):
-                    break
+                    if self.bestSolution.v == self.optimum:
+                        ret.append(self.bestSolution.v)
+                        break
             ret.append(self.bestSolution.v)
+        return name, ret
 
     def accept(self, newState, pij, pji):
         unif = random.random()
@@ -133,10 +137,11 @@ class Simulation():
         return p[:]    
     
     def metropolisHasting(self):
-        count = 0
+        name = 'Metropolis Hasting'
+        t = 0   # steps
         ret = []
-        while count < self.executions:
-            count += 1
+        while t < self.executions:
+            t += 1
             currentChanged = False
             newState = State()
             while len(newState.items) == 0:
@@ -157,30 +162,32 @@ class Simulation():
             
             if currentChanged and self.isBetterSolution(self.currentSolution):
                 if self.bestSolution.v == self.optimum:
+                    ret.append(self.bestSolution.v)
                     break
             ret.append(self.bestSolution.v)
+        return name, ret
 
     def hillClimbing(self):
         # bestSolution is always currentSolution
-        count = 0
+        name = 'Hill Climbing'
+        t = 0   # steps
         ret = []
         while 1:
-            count += 1
+            t += 1
             newState = max(self.allNewStates())
             if self.isBetterSolution(newState):
-                # print('FOUND BETTER: itt =>', count, '- Best  V =>', self.bestSolution.v, 'W =>', self.bestSolution.w)
                 ret.append(self.bestSolution.v)
             else:
-                print('LOCAL MAX: itt =>', count-1, '- Best  V =>', self.bestSolution.v, 'W =>', self.bestSolution.w)
                 break
-        return ret
+        return name, ret
     
     def boltzman(self, deltaV, t, pij, pji):
         return exp(deltaV/t) * pji / pij
 
     def simulatedAnnealing(self, initialT, epsilon, coolingStrategy, beta):
-        t = 0
+        name = 'Simulated Annealing T = ' + str(initialT) + ' b = ' + str(beta) + ' ' + coolingStrategy.__name__
         temperature = initialT
+        t = 0   # steps
         ret = []
         while temperature > epsilon:
             t += 1
@@ -202,12 +209,12 @@ class Simulation():
                     currentChanged = True
 
             if currentChanged and self.isBetterSolution(self.currentSolution):
-                # print('itt =>', t, '- Best  V =>', self.bestSolution.v, 'W =>', self.bestSolution.w)
                 if self.bestSolution.v == self.optimum:
+                    ret.append(self.bestSolution.v)
                     break
             ret.append(self.bestSolution.v)
             temperature = coolingStrategy(initialT, beta, t, delta)
-        return ret
+        return name, ret
         
 
     def linearCoolingStrategy(self, initialT, beta, t, delta):
