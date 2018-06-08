@@ -25,9 +25,9 @@ def saveResult(result, problem, algorithmName):
             result = ','.join(map(str, result)) 
             f.write(result)
 
-def plotComparison(problems):
+def plotComparison(problems, gType="std"):
     for problem in problems:
-        print('plotting', problem)
+        print('Plotting opt value graphic', problem)
         plt.figure(figsize=(16,9))
         fileName = outputFolder + problem + '.out'
         opt = 0
@@ -37,18 +37,21 @@ def plotComparison(problems):
                 opt = float(splittedLine[0])
                 algorithmName = str(splittedLine[1])
                 splittedResults = list(map(lambda x: float(x), splittedLine[2:]))
-                plt.loglog(range(1,1+len(splittedResults)), splittedResults, label=algorithmName)
-        
+                if(gType=="log"):
+                    plt.loglog(range(1,1+len(splittedResults)), splittedResults, label=algorithmName)
+                else:
+                    plt.plot(range(len(splittedResults)), splittedResults, label=algorithmName)
+
         plt.axhline(y=opt, linestyle='dashed', color='c')
         plt.legend()
         plt.xlabel('Steps')
         plt.ylabel('Values in knapsack')
-        plt.savefig(outputFolder + problem + '_values.png')
+        plt.savefig(outputFolder + problem +'_'+ gType+'_values.png')
         plt.clf()
 
-def plotError(problems):
+def plotError(problems, gType="std"):
     for problem in problems:
-        print('plotting', problem)
+        print('plotting error graphic', problem)
         plt.figure(figsize=(16,9))
         fileName = outputFolder + problem + '.out'
         opt = 0
@@ -57,20 +60,23 @@ def plotError(problems):
                 splittedLine = line.split(',')
                 opt = float(splittedLine[0])
                 algorithmName = str(splittedLine[1])
-                splittedResults = list(map(lambda x: float(x)-opt, splittedLine[2:]))
-                plt.loglog  (range(1,1+len(splittedResults)), splittedResults, label=algorithmName)
+                splittedResults = list(map(lambda x: abs(float(x)-opt), splittedLine[2:]))
+                if(gType=="log"):
+                    plt.loglog(range(1,1+len(splittedResults)), splittedResults, label=algorithmName)
+                else:
+                    plt.plot(range(len(splittedResults)), splittedResults, label=algorithmName)
         
         plt.legend()
         plt.xlabel('Steps')
-        plt.ylabel('Values in knapsack')
-        plt.savefig(outputFolder + problem + '_error.png')
+        plt.ylabel('Error')
+        plt.savefig(outputFolder + problem +'_'+gType+'_error.png')
         plt.clf()
 
 
 if __name__ == '__main__':
-    problems = ['500_11.csv']
-    times = 1
-
+    problems = ['teste.csv']
+    times = 3
+    mean = True
     for problem in problems:
         s = Simulation(dataFolder + problem, 10 ** 4)
         res = []
@@ -82,13 +88,29 @@ if __name__ == '__main__':
             # name, out = s.metropolisHasting()
             # name, out = s.hillClimbing()
             # name, out = s.simulatedAnnealing(10**3, 10**(-8), s.linearCoolingStrategy, 0.99)
-            name, out = s.simulatedAnnealing(10**30, 10**(-8), s.expCoolingStrategy, 0.99)
+            name, out = s.simulatedAnnealing(10**20, 10**(-8), s.expCoolingStrategy, 0.99)
             # name, out = s.simulatedAnnealing(10**5, 10**(-8), s.dynamicCoolingStrategy, 0.5)
             
-            if s.bestSolution.v > bestFound:
-                res = out
-                bestFound = s.bestSolution.v
-                
+            if(mean and times>1):
+                res.append(out)
+            else:
+                if s.bestSolution.v > bestFound:
+                    res = out
+                    bestFound = s.bestSolution.v
+        
+        if(mean and times > 1):
+            max_size = max([len(res[i]) for i in range(len(res))])
+            vec_sum = np.zeros(max_size)
+            for v in res:
+                v.extend([v[-1] for i in range(max_size-len(v))])
+                vec_sum+= np.array(v)
+            vec_sum /= len(res)
+            res = vec_sum.tolist()
+            name = str(times)+"_times_mean_"+name
+        
         saveResult(res, problem, name)
 
     plotComparison(problems)
+    plotComparison(problems,'log')    
+    plotError(problems)
+    plotError(problems,'log')
