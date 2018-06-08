@@ -43,7 +43,7 @@ def plotComparison(problems):
         plt.legend()
         plt.xlabel('Steps')
         plt.ylabel('Values in knapsack')
-        plt.savefig(outputFolder + problem + '.png')
+        plt.savefig(outputFolder + problem + '_values.png')
         plt.clf()
 
 def plotError(problems):
@@ -63,7 +63,7 @@ def plotError(problems):
         plt.legend()
         plt.xlabel('Steps')
         plt.ylabel('Values in knapsack')
-        plt.savefig(outputFolder + problem + '.png')
+        plt.savefig(outputFolder + problem + '_error.png')
         plt.clf()
 
 
