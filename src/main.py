@@ -46,7 +46,7 @@ def plotComparison(problems, gType="std"):
         plt.legend()
         plt.xlabel('Steps')
         plt.ylabel('Values in knapsack')
-        plt.savefig(outputFolder + problem +'_'+ gType+'_values.png')
+        plt.savefig(outputFolder + problem + '_' + gType + '_values.png')
         plt.clf()
 
 def plotError(problems, gType="std"):
@@ -69,7 +69,7 @@ def plotError(problems, gType="std"):
         plt.legend()
         plt.xlabel('Steps')
         plt.ylabel('Error')
-        plt.savefig(outputFolder + problem +'_'+gType+'_error.png')
+        plt.savefig(outputFolder + problem + '_' + gType + '_error.png')
         plt.clf()
 
 
@@ -91,22 +91,22 @@ if __name__ == '__main__':
             name, out = s.simulatedAnnealing(10**20, 10**(-8), s.expCoolingStrategy, 0.99)
             # name, out = s.simulatedAnnealing(10**5, 10**(-8), s.dynamicCoolingStrategy, 0.5)
             
-            if(mean and times>1):
+            if mean and times > 1:
                 res.append(out)
             else:
                 if s.bestSolution.v > bestFound:
                     res = out
                     bestFound = s.bestSolution.v
         
-        if(mean and times > 1):
+        if mean and times > 1:
             max_size = max([len(res[i]) for i in range(len(res))])
             vec_sum = np.zeros(max_size)
             for v in res:
                 v.extend([v[-1] for i in range(max_size-len(v))])
-                vec_sum+= np.array(v)
+                vec_sum += np.array(v)
             vec_sum /= len(res)
             res = vec_sum.tolist()
-            name = str(times)+"_times_mean_"+name
+            name = str(times) + '_times_mean_' + name
         
         saveResult(res, problem, name)
 

@@ -46,6 +46,10 @@ class Simulation():
                     self.currentSolution.items.append(0)
         self.initialSolution = self.currentSolution.copy()
 
+    def restartInstance(self):
+        self.currentSolution = self.initialSolution.copy()
+        self.bestSolution = self.initialSolution.copy()
+
     def isValidStateWith(self, w, state = State()):
         if len(state.items) == 0:
             state = self.currentSolution
@@ -96,8 +100,7 @@ class Simulation():
         return State()
 
     def randomWalk(self, p):
-        self.currentSolution = self.initialSolution.copy()
-        self.bestSolution = self.initialSolution.copy()
+        self.restartInstance()
 
         name = 'Random Walk p = ' + str(p)
         t = 0   # steps
@@ -141,9 +144,7 @@ class Simulation():
         return p[:]    
     
     def metropolisHasting(self):
-        
-        self.currentSolution = self.initialSolution.copy()
-        self.bestSolution = self.initialSolution.copy()
+        self.restartInstance()
         
         name = 'Metropolis Hasting'
         t = 0   # steps
@@ -176,10 +177,9 @@ class Simulation():
         return name, ret
 
     def hillClimbing(self):
-        # bestSolution is always currentSolution
-        self.currentSolution = self.initialSolution.copy()
-        self.bestSolution = self.initialSolution.copy()
+        self.restartInstance()
         
+        # bestSolution is always currentSolution
         name = 'Hill Climbing'
         t = 0   # steps
         ret = [self.bestSolution.v]
@@ -199,14 +199,12 @@ class Simulation():
         return exp(deltaV/t) * pji / pij
 
     def simulatedAnnealing(self, initialT, epsilon, coolingStrategy, beta):
-        self.currentSolution = self.initialSolution.copy()
-        self.bestSolution = self.initialSolution.copy()
+        self.restartInstance()
         
         def format_e(n):
             #format large number in scientific notation
             a = '%E' % n
             return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
-        
 
         name = 'Simulated Annealing T = ' + str(format_e(initialT)) + ' b = ' + str(beta) + ' ' + coolingStrategy.__name__
         temperature = initialT
