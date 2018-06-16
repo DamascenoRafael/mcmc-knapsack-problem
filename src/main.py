@@ -74,11 +74,16 @@ def plotError(problems, gType="std"):
 
 
 if __name__ == '__main__':
+    
+    executions = 10 ** 4            # number of iterations for the algorithms (except Simulated Annealing)
+    times = 3                       # how many times each algorithm will be executed
+    mean = True                     # mean or optimum result to be saved and plotted
+    
+    # ploblems that will be executed
     problems = ['teste.csv']
-    times = 3
-    mean = True
+
     for problem in problems:
-        s = Simulation(dataFolder + problem, 10 ** 4)
+        s = Simulation(dataFolder + problem, executions)
         res = []
         bestFound = 0
         name = ''
@@ -110,7 +115,7 @@ if __name__ == '__main__':
         
         saveResult(res, problem, name)
 
-    plotComparison(problems)
+    # plotComparison(problems)
     plotComparison(problems,'log')    
-    plotError(problems)
+    # plotError(problems)
     plotError(problems,'log')
