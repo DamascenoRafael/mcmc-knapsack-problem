@@ -38,15 +38,14 @@ def execute(problems, executions, times, mean):
     for problem in problems:
         s = Simulation(dataFolder + problem, executions)
 
-        for x in range(len(algorithms)):
+        for i in range(len(algorithms)):
             res = []
             bestFound = 0
             name = ''
-            alg = algorithms[x]
-            alg_params = algorithms_params[x]
+            alg = algorithms[i]
+            alg_params = algorithms_params[i]
 
-            for i in range(times):
-                s = Simulation(dataFolder + problem, executions)
+            for itt in range(times):
                 if alg == 1:
                     name, out = s.randomWalk(alg_params[0])
                 elif alg == 2:
