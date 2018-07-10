@@ -14,7 +14,7 @@ The objective of this repository is to establish solutions for the 0/1 Knapsack 
 
 ## Running algorithms
 
-All algorithms are written using [Python 3] (https://www.python.org/) and are available in the `src` directory. In the `data` directory you can find some problems that can be executed by the algorithms.
+All algorithms are written using [Python 3](https://www.python.org/) and are available in the `src` directory. In the `data` directory you can find some problems that can be executed by the algorithms.
 
 The different algorithms involving Markov Chains Monte Carlo can be run through the file `src/main.py`, where there are comments explaining how to select the problems, the algorithms and the ways of performance evaluation.
 
